@@ -53,8 +53,10 @@ moveModule.jump()
 <br/>**`moveModule.jump()`**  
 &ensp;&ensp;When you call this method, the moveValue jumps from where it is to the middle of the path between zero and maxValue, then coming back. Use this to give like a hint to the user on what he needs to do.  This action works only if the moveValue at the moment is equal to the maxValue or to`0`.
 
-
-
 <br/>**`moveModule.switch()`**  
 &ensp;&ensp;This method switches the moveValue from his actual position to the other end.
+
+<br/><br/>**Important:**  
+&ensp;&ensp; Only vertical movements are evaluated.
+&ensp;&ensp; Works with both mouse and touch.
 
