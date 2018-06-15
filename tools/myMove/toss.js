@@ -27,13 +27,21 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
     module.reset = () => {
         clearMesure()
 
-        if(!module.runing) return
+        if(!module.running) return
+
+        module.running = false
+
+        if(module.jumpToEndRunning) {
+            module.jumpToEndRunning = false
+        }
+
         endTossLoop()
         endTossLoop = undefined
-        module.runing = false
+        
     }
 
-    module.runing = false
+    module.running = false
+    module.jumpToEndRunning = false
 
 
 
@@ -54,12 +62,13 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
 
     module.tossDifferent = (wich, from, to) => {
         let tossTo = undefined
-        if(wich == 'jump') {
+        if(wich == 'jumpToMiddle') {
             tossTo = 'tomiddle'
         }
         else
-        if(wich == 'switch') {
+        if(wich == 'jumpToEnd') {
             tossTo = 'toend' 
+            module.jumpToEndRunning = true
         }
 
 
@@ -126,7 +135,7 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
 
     function tossIt (time, value, velo, acel) {
         endTossLoop = toss(time, value, velo, acel)
-        module.runing = true
+        module.running = true
         clearMesure()
     }
     
@@ -136,9 +145,9 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
     function toss (time, value, velo, acel) { 
         let endToss = false
         
-        requestAnimationFrame(()=>{
+        setTimeout(()=>{//!important
             _toss(time, value, velo, acel)
-        })
+        }, 16)
         
         return ()=> endToss = true
 
@@ -149,7 +158,7 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
             const nowTime = Date.now()
             const deltaTime = nowTime - time
             const newValue = value + velo * deltaTime + (acel * deltaTime * deltaTime) / 2
-
+            
             module.listeners.move(newValue)
             requestAnimationFrame(()=>{
                 _toss(time, value, velo, acel)

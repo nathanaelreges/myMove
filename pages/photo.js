@@ -1,6 +1,5 @@
 _['pages/photo.js'] = function getPhoto () {
     const initMyMove = _['tools/myMove/init.js']
-    const initMyMoveListen = _['tools/myMoveListen.js']
     const newEle = _['tools/myLib.js'].newEle
 
     const module = {}
@@ -48,7 +47,7 @@ _['pages/photo.js'] = function getPhoto () {
 
     const maxValue = window.innerHeight
 
-    const moveModule = initMyMove(renderMove, {maxValue, eleToListen: thisPageEle, adjustAcel: 2})
+    const moveModule = initMyMove(renderMove, maxValue, thisPageEle, {adjustAcel: 3})
     
     moveModule.onEndMove = (position) => {
         if(position === 'zero') {

@@ -1,77 +1,61 @@
-_['tools/myMove/init.js'] = function getMyMove (renderFun, opts = {}) {
+_['tools/myMove/init.js'] = function getMyMove (renderFun, maxValue, eleToListen, opts = {}) {
     
     const initToss = _['tools/myMove/toss.js']
     const initRender = _['tools/myMove/render.js']
-    const initUserMove = _['tools/myMove/userMove.js']
-
-   
-    const positiveMaxValue = opts.maxValue > 0
-    
-    
-    const startValue = 0
-    const highestValue = positiveMaxValue? opts.maxValue: 0;
-    const lowestValue = positiveMaxValue? 0: opts.maxValue;
-    let gluedTo = positiveMaxValue? 'low': 'high'
-    let moving = false
+    const initListen = _['tools/myMove/listen.js']
     
     const module = {}
    
+    
+    opts.adjustAcel = opts.adjustAcel == undefined ? 1: opts.adjustAcel
+
+    const positiveMaxValue = maxValue > 0
+    const highestValue = positiveMaxValue? maxValue: 0;
+    const lowestValue = positiveMaxValue? 0: maxValue;
+    let gluedTo = positiveMaxValue? 'low': 'high'
+    let moveRunning = false
+
+   
 
 
-    const render = initRender({highestValue, lowestValue, startValue, startAt: gluedTo})
 
-    const toss = initToss(opts.adjustAcel)
 
-    toss.listeners = {
-        move (rawValue) {
-            if(!moving){
-                moving = true
+    const render = initRender({highestValue, lowestValue, startValue: 0, startAt: gluedTo})
+
+
+
+
+    const listen = initListen(eleToListen)
+
+    listen.listeners = {
+        touchStart (rawValue) {
+            
+            if(toss.running) {
+                if(toss.jumpToEndRunning) {
+                    listen.skipThisTouch()
+                    return
+                }
+                else{
+                    toss.reset()
+                    render.looseRef()
+                }
+            }
+
+            render.refer(rawValue)
+            toss.mesure(rawValue)
+            
+            if(!moveRunning){
+                moveRunning = true
                 module.onStartMove()
             }
-
-            if(!render.referenced) {
-                render.refer(rawValue)    
-                return
-            }
-
+        },
+        touchMove (rawValue) {        
             const renderedValue = render.move(rawValue)
             renderFun(renderedValue)
-            
-            const position = render.getPosition()        
-            if(position != 'mid'){
-                end(position)
-            }
-        }
-    }
-
-
-
-
-
-    const userMove = initUserMove(opts.eleToListen)
-
-    userMove.listeners = {
-        userMove (rawValue) {
-            if(!moving){
-                moving = true
-                module.onStartMove()
-            }
-            
-            if(toss.runing) {
-                resetModules()
-            }
-    
-            if(!render.referenced) {
-                render.refer(rawValue)    
-            }
-            else {
-                const renderedValue = render.move(rawValue)
-                renderFun(renderedValue)
-            }
     
             toss.mesure(rawValue)
         },
-        endMove () { 
+        touchEnd () { 
             const position = render.getPosition()
 
             if(position == 'mid'){
@@ -82,22 +66,73 @@ _['tools/myMove/init.js'] = function getMyMove (renderFun, opts = {}) {
             }
         }
     }
+ 
+    
 
+    
+    const toss = initToss(opts.adjustAcel)
+
+    toss.listeners = {
+        move (rawValue) {
+            const renderedValue = render.move(rawValue)
+            renderFun(renderedValue)
+
+            const position = render.getPosition()        
+            if(position != 'mid'){
+                end(position)
+            }
+        }
+    }   
+
+
+    
 
 
 
 
     module.cancelMove = function () {
-       resetModules()        
+        resetModules()
+        moveRunning = false
     }
 
 
     module.jump = function () {
-        especialToss('jump')
+        const position = render.getPosition()        
+        if(position != gluedTo) {return}
+    
+        const {from, to} = gluedTo == 'low'? {from: lowestValue, to: highestValue} : {from: highestValue, to: lowestValue}
+        
+        toss.reset()
+        render.looseRef()
+        render.refer(from) 
+
+        if(!moveRunning){
+            moveRunning = true
+            module.onStartMove()    
+        }            
+        
+        toss.tossDifferent('jumpToMiddle', from, to)
+
     }
 
+
     module.switch = function () {
-        especialToss('switch')
+        resetModules()
+    
+        const {from, to} = gluedTo == 'low'? {from: lowestValue, to: highestValue} : {from: highestValue, to: lowestValue}
+
+        render.refer(from) 
+
+        if(!moveRunning) {          
+            moveRunning = true
+            module.onStartMove()
+        }
+
+        toss.tossDifferent('jumpToEnd', from, to)
+    }
+
+    module.moveAlreadyStarted = ({startEvent}) => {
+        listen.moveStartEvent(startEvent)
     }
 
     module.onStartMove = () => {}
@@ -113,27 +148,8 @@ _['tools/myMove/init.js'] = function getMyMove (renderFun, opts = {}) {
 
 
 
-
-    function especialToss (wich) {
-        if(toss.runing){return}
-        
-        const position = render.getPosition()
-        
-        if(position == 'mid'){
-            tossForMe()
-        }
-        else {
-            resetModules()
-            const {from, to} = gluedTo == 'low'? {from: lowestValue, to: highestValue} : {from: highestValue, to: lowestValue}
-            
-            toss.tossDifferent(wich, from, to)
-        }
-    }
-
-
-
     function tossForMe () {
-        if(toss.runing){return}
+        if(toss.running){return}
 
         const acelDir = gluedTo == 'low'? -1: 1
         toss.toss(acelDir)
@@ -142,24 +158,36 @@ _['tools/myMove/init.js'] = function getMyMove (renderFun, opts = {}) {
 
 
     function end (position) {
+        toss.reset()
+        render.looseRef()
+
         if(position == 'low'){
-            module.onEndMove(positiveMaxValue? 'zero': 'max')
-            moving = false
+            moveRunning = false
             gluedTo = 'low'
+            module.onEndMove(positiveMaxValue? 'zero': 'max')
         }
         else if(position == 'high'){
-            module.onEndMove(positiveMaxValue? 'max': 'zero')
-            moving = false
+            moveRunning = false
             gluedTo = 'high'
+            module.onEndMove(positiveMaxValue? 'max': 'zero')
         }
 
-        resetModules()
+
     }
 
     
     function resetModules () {
-        render.looseRef()
-        toss.reset()
+        listen.skipThisTouch()
+
+        if(toss.running) {
+            toss.reset()
+        }
+        
+        if(render.referenced) {
+            render.looseRef()
+        }
     }
 
 }
+
+

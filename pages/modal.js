@@ -1,6 +1,5 @@
 _['pages/modal.js'] = function getModal () {
     const initMyMove = _['tools/myMove/init.js']
-    const initMyMoveListen = _['tools/myMoveListen.js']
     const newEle = _['tools/myLib.js'].newEle
     const listenActions = _['tools/myLib.js'].listenActions
 
@@ -102,7 +101,7 @@ _['pages/modal.js'] = function getModal () {
 
     const maxValue = window.innerHeight 
 
-    const moveModule = initMyMove(renderMove, {maxValue, eleToListen: modalEle, adjustAcel: 3})
+    const moveModule = initMyMove(renderMove, maxValue, modalEle, {adjustAcel: 3})
     
     moveModule.onEndMove = (position) => {
         if(position === 'max') {
