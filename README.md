@@ -11,16 +11,16 @@ With this module, you can implement actions like drag a modal down to dismiss it
 
 Get it up and running just like this:
 ```javascript
-const moveModule = myMove(renderFunction, {maxValue, eleToListen})
+const moveModule = myMove(renderFunction, maxValue, eleToListen)
 
-moveModule.onStartMovement = () => {/*your code*/}
-moveModule.onEndMovement = (position) => {/*your code*/}
+moveModule.onStartMove = () => {/*your code*/}
+moveModule.onEndMove = (position) => {/*your code*/}
 ```
 <br/>**`renderFunction`**  
 ```javascript
 function renderFunction (moveValue) {
 	element.style.transform = `translateY(${moveValue}px)`
-	//Our anithing your imagination can came up with.
+	//Or anything your imagination can come up with.
 }
 ```
 Render function is the function responsible for rendering the movement. It will receive an argument that represents the distance that the user's finger has traveled through the screen.
@@ -31,16 +31,15 @@ This one sets the number of pixels that the user will be allowed to move. MyMove
 <br/>**`eleToListen`**  
 The element wich myMove will add event listeners to watch for movements. 
 
-<br/>**`moveModule.onStartMovement`**  
-You may assign this property a function to be executed when a movement starts. 
+<br/>**`moveModule.onStartMove`**  
+You may assign this property a function to be executed when a move sequence starts, wich can be triggerd by a `touchstart` or a `mousedown` event. 
 
-
-<br/>**`moveModule.onEndMovement`**  
-You may assign this property a function to be executed when a movement ends, what happens when the moveValue reaches 0 or maxValue and the user isn't touching the screen. The argument received by this function can be 'max' or 'zero' accordingly to where the moveValue is situated. 
+<br/>**`moveModule.onEndMove`**  
+You may assign this property a function to be executed when a move sequence ends, what happens when the user isn't touching the screen and moveValue is either 0 or maxValue. The argument received by this function can be 'max' or 'zero' depending on where the moveValue is situated.   
 
 <br/><br/><br/>**Some specific properties and methods:**
 ```javascript
-const moveModule = myMove(firstArg, {adjustAcel})
+const moveModule = myMove(arg1, arg2, arg3, {adjustAcel})
 
 moveModule.switch()
 moveModule.jump()
@@ -54,8 +53,14 @@ This property lets you adjust how fast the user needs to trow to reach the oppos
 When you call this method, the moveValue jumps from where it is to the middle of the path between zero and maxValue, then coming back. Use this to give like a hint to the user on what he needs to do.  This action works only if the moveValue at the moment is equal to the maxValue or to`0`.
 
 <br/>**`moveModule.switch()`**  
-This method switches the moveValue from his actual position to the other end.
+This method switches the moveValue from his actual position to the farthest one.
 
+<br/>**`moveModule.moveAlreadyStarted({ startEvent })`**  
+Let's say you want to append some moving elements and load myMoveModule after the user started to move. You may do it just like you would in any other case with the addition of calling this method and supplying the captured event.  
+  
+<br/>**`moveModule.cancelMove()`**  
+This methods ends the on going move sequence if any.
+  
 <br/><br/>**Important:**  
 Only vertical movements are evaluated.  
 Works with both mouse and touch.
