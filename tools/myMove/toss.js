@@ -72,8 +72,11 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
         }
 
 
-        const {time, value, velo, acel} = calculateToss(tossTo, from, to)
-        tossIt(time, value, velo, acel)
+        const {value, velo, acel} = calculateToss(tossTo, from, to)
+        const time = Date.now()
+        requestAnimationFrame(()=>{
+            tossIt(time, value, velo, acel)
+        })
     }
 
 
@@ -85,7 +88,6 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
     }
 
     function calculateToss (str, from, to) {
-        const time = Date.now()
         const value = from
         let acel = saveAcel
         let velo = undefined
@@ -130,7 +132,7 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
             acel *= -1  
         }
 
-        return {time, value, velo, acel}
+        return {value, velo, acel}
     }
 
     function tossIt (time, value, velo, acel) {
@@ -145,9 +147,9 @@ _['tools/myMove/toss.js'] = function getToss (adjustAcel) {
     function toss (time, value, velo, acel) { 
         let endToss = false
         
-        setTimeout(()=>{//!important
+        requestAnimationFrame(()=>{
             _toss(time, value, velo, acel)
-        }, 16)
+        })
         
         return ()=> endToss = true
 
