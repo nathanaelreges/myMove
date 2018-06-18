@@ -19,7 +19,7 @@ moveModule.onEndMove = (position) => {/*your code*/}
 <br/>**`renderFunction`**  
 ```javascript
 function renderFunction (moveValue) {
-	element.style.transform = `translateY(${moveValue}px)`
+	element.style.transform = `translateY(${moveValue}px)` // e.g.
 	//Or anything your imagination can come up with.
 }
 ```
@@ -50,7 +50,7 @@ moveModule.jump()
 This property lets you adjust how fast the user needs to trow to reach the opposite boundary. Acel stands for acceleration which, in this case, is what makes the "object" come back to its original coordinate. The acceleration value will be multiplied by the adjustAcel value. Set values like `2` to increase or values like `0.5` to decrease the acceleration. 0 is not accepted.
 
 <br/>**`moveModule.jump()`**  
-When you call this method, the moveValue jumps from where it is to the middle of the path between zero and maxValue, then coming back. Use this to give like a hint to the user on what he needs to do.  This action works only if the moveValue at the moment is equal to the maxValue or to`0`.
+When you call this method, the moveValue jumps from where it is to the middle of the path between zero and maxValue, then coming back. Use this to give like a hint to the user on what he needs to do.  This action works only if the moveValue at the moment is equal to the maxValue or to `0`.
 
 <br/>**`moveModule.switch()`**  
 This method switches the moveValue from his actual position to the farthest one.
